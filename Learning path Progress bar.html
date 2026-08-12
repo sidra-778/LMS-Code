@@ -1,135 +1,232 @@
-import React, { useState, useEffect } from "react";
-import { fetchApi } from "../../lib/api";
-import { Link } from "react-router-dom";
-import { Button } from "../../components/ui/Button";
-import { BookOpen, Map, ChevronRight, CheckCircle } from "lucide-react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Learning Paths Preview</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f3f4f6;
+    margin: 0;
+    padding: 32px;
+    color: #111827;
+  }
+  .wrap { max-width: 1024px; margin: 0 auto; }
+  .notice {
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    color: #3730a3;
+    font-size: 13px;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .notice code { background: #e0e7ff; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
 
-// Added: calculates 0-100 progress for a path based on completed courses
+  h1 { font-size: 28px; font-weight: 700; margin: 0 0 6px; color: #111827; }
+  .subtitle { color: #6b7280; font-size: 16px; margin: 0 0 28px; }
+
+  .path-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    overflow: hidden;
+    display: flex;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 768px) {
+    .path-card { flex-direction: column; }
+  }
+
+  .path-left {
+    width: 34%;
+    background: #f9fafb;
+    border-right: 1px solid #f3f4f6;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  @media (max-width: 768px) {
+    .path-left { width: 100%; border-right: none; border-bottom: 1px solid #f3f4f6; }
+  }
+
+  .path-title { font-size: 22px; font-weight: 700; margin: 0 0 8px; color: #111827; }
+  .path-desc { color: #4b5563; margin: 0 0 20px; font-size: 14px; line-height: 1.5; }
+
+  .progress-wrap { margin-top: 8px; }
+  .progress-top { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .progress-label { font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.03em; }
+  .progress-pct { font-size: 12px; font-weight: 700; color: #374151; }
+  .progress-track { width: 100%; height: 10px; border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 999px; transition: width 0.5s ease; }
+
+  .courses-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #4338ca;
+    background: #eef2ff;
+    padding: 6px 14px;
+    border-radius: 999px;
+    width: fit-content;
+    margin-top: 18px;
+  }
+
+  .path-right { width: 66%; padding: 24px; }
+  @media (max-width: 768px) {
+    .path-right { width: 100%; }
+  }
+  .timeline { position: relative; }
+  .timeline-line {
+    position: absolute;
+    left: 24px;
+    top: 32px;
+    bottom: 32px;
+    width: 2px;
+    background: #e5e7eb;
+  }
+  .step { position: relative; display: flex; gap: 16px; margin-bottom: 20px; }
+  .step:last-child { margin-bottom: 0; }
+  .step-num {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #4338ca;
+    display: flex; align-items: center; justify-content: center;
+    color: #4338ca; font-weight: 700; font-size: 15px;
+    z-index: 1; flex-shrink: 0;
+  }
+  .step-card {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #f3f4f6;
+    flex: 1;
+  }
+  .step-title { font-weight: 700; color: #111827; margin: 0 0 4px; font-size: 15px; }
+  .step-desc { color: #6b7280; font-size: 13px; margin: 0; }
+  .step-meta { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; font-weight: 600; color: #9ca3af; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="notice">
+    ⚠️ Standalone <b>preview</b> — mock data ke sath, pure inline CSS use hui hai (koi external CDN nahi), taake styling har jagah guaranteed dikhe. Asal <code>LearningPaths.jsx</code> mein Tailwind classes hain jo aapke project ke Tailwind setup se style hongi.
+  </div>
+
+  <h1>Learning Paths</h1>
+  <p class="subtitle">Curated journeys designed to build mastery in specific domains.</p>
+
+  <div id="paths"></div>
+</div>
+
+<script>
+const mockPaths = [
+  {
+    id: 1,
+    title: "Frontend Fundamentals",
+    description: "Curated journey through HTML, CSS and JavaScript basics.",
+    courses: [
+      { completed: true,  course: { title: "HTML Essentials", description: "Structure and semantics of the web.", _count: { modules: 8 }, timeLimitMins: 45 } },
+      { completed: true,  course: { title: "CSS Layout & Styling", description: "Flexbox, grid, and responsive design.", _count: { modules: 10 }, timeLimitMins: 60 } },
+      { completed: false, course: { title: "JavaScript Basics", description: "Variables, functions, and DOM manipulation.", _count: { modules: 12 }, timeLimitMins: 90 } },
+      { completed: false, course: { title: "Modern JS (ES6+)", description: "Arrow functions, promises, modules.", _count: { modules: 9 }, timeLimitMins: 75 } },
+      { completed: false, course: { title: "React Foundations", description: "Components, props, and state.", _count: { modules: 14 }, timeLimitMins: 120 } },
+    ],
+  },
+  {
+    id: 2,
+    title: "Data Structures Deep Dive",
+    description: "From arrays to graphs, with hands-on exercises.",
+    courses: [
+      { completed: true,  course: { title: "Arrays & Strings", description: "Core operations and complexity.", _count: { modules: 6 }, timeLimitMins: 40 } },
+      { completed: false, course: { title: "Linked Lists", description: "Singly and doubly linked structures.", _count: { modules: 5 }, timeLimitMins: 35 } },
+      { completed: false, course: { title: "Trees & Graphs", description: "Traversals and shortest paths.", _count: { modules: 11 }, timeLimitMins: 80 } },
+    ],
+  },
+  {
+    id: 3,
+    title: "Cloud Architecture",
+    description: "Design resilient, scalable systems on modern cloud platforms.",
+    courses: [
+      { completed: true, course: { title: "Cloud Fundamentals", description: "Compute, storage, and networking basics.", _count: { modules: 7 }, timeLimitMins: 50 } },
+      { completed: true, course: { title: "Containers & Orchestration", description: "Docker and Kubernetes essentials.", _count: { modules: 9 }, timeLimitMins: 70 } },
+      { completed: true, course: { title: "CI/CD Pipelines", description: "Automating build, test, and deploy.", _count: { modules: 6 }, timeLimitMins: 45 } },
+    ],
+  },
+];
+
 function getPathProgress(path) {
   const total = path.courses.length;
   if (total === 0) return 0;
-  const completed = path.courses.filter(
-    (pc) => pc.completed || pc.course?.completed
-  ).length;
+  const completed = path.courses.filter(pc => pc.completed || (pc.course && pc.course.completed)).length;
   return Math.round((completed / total) * 100);
 }
 
-// Added: maps percent to a color band -> red, yellow, light green, green
 function getProgressColor(percent) {
-  if (percent < 25) return { bar: "bg-red-500", track: "bg-red-100", label: "Just Started" };
-  if (percent < 50) return { bar: "bg-yellow-500", track: "bg-yellow-100", label: "In Progress" };
-  if (percent < 75) return { bar: "bg-green-400", track: "bg-green-100", label: "Almost There" };
-  return { bar: "bg-green-500", track: "bg-green-100", label: "Complete" };
+  if (percent < 25) return { bar: "#ef4444", track: "#fee2e2", label: "Just Started" };
+  if (percent < 50) return { bar: "#eab308", track: "#fef9c3", label: "In Progress" };
+  if (percent < 75) return { bar: "#4ade80", track: "#dcfce7", label: "Almost There" };
+  return { bar: "#22c55e", track: "#dcfce7", label: "Complete" };
 }
 
-// Added: the single progress bar component
-function PathProgressBar({ path }) {
+function renderProgressBar(path) {
   const percent = getPathProgress(path);
-  const { bar, track, label } = getProgressColor(percent);
-
-  return (
-    <div className="mt-4">
-      <div className="flex items-center justify-between mb-1.5">
-        <span className="text-xs font-semibold text-gray-500">{label}</span>
-        <span className="text-xs font-bold text-gray-700">{percent}%</span>
+  const c = getProgressColor(percent);
+  return `
+    <div class="progress-wrap">
+      <div class="progress-top">
+        <span class="progress-label">${c.label}</span>
+        <span class="progress-pct">${percent}%</span>
       </div>
-      <div className={`w-full h-2.5 rounded-full overflow-hidden ${track}`}>
-        <div
-          className={`h-full rounded-full transition-all duration-500 ${bar}`}
-          style={{ width: `${percent}%` }}
-        />
+      <div class="progress-track" style="background:${c.track};">
+        <div class="progress-fill" style="width:${percent}%; background:${c.bar};"></div>
       </div>
-    </div>
-  );
+    </div>`;
 }
 
-export default function LearningPaths() {
-  const [paths, setPaths] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const data = await fetchApi("/api/learning-paths");
-        setPaths(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadData();
-  }, []);
-
-  if (loading) return <div className="p-12 text-center text-gray-500">Loading learning paths...</div>;
-
-  return (
-    <div className="space-y-8 max-w-6xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-display font-bold text-gray-900">Learning Paths</h1>
-        <p className="text-gray-500 mt-2 text-lg">Curated journeys designed to build mastery in specific domains.</p>
+function renderStep(pc, idx) {
+  return `
+    <div class="step">
+      <div class="step-num">${idx + 1}</div>
+      <div class="step-card">
+        <h3 class="step-title">${pc.course.title}</h3>
+        <p class="step-desc">${pc.course.description}</p>
+        <div class="step-meta">
+          <span>${pc.course._count?.modules || 0} Modules</span>
+          ${pc.course.timeLimitMins ? `<span>• ${pc.course.timeLimitMins} mins</span>` : ""}
+        </div>
       </div>
-
-      {paths.length === 0 ? (
-        <div className="bg-white p-12 text-center rounded-2xl border shadow-sm">
-          <Map className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-          <h2 className="text-2xl font-bold text-gray-700">No Paths Available</h2>
-          <p className="text-gray-500 mt-2">Check back later for new learning journeys!</p>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {paths.map(path => (
-            <div key={path.id} className="bg-white rounded-2xl border shadow-sm overflow-hidden flex flex-col md:flex-row">
-              <div className="p-8 md:w-1/3 bg-gray-50 border-r border-gray-100 flex flex-col justify-center">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">{path.title}</h2>
-                <p className="text-gray-600 mb-6 flex-1">{path.description}</p>
-
-                {/* Added: progress bar */}
-                <PathProgressBar path={path} />
-
-                <div className="flex items-center gap-2 text-sm font-bold text-primary bg-green-50 px-3 py-1.5 rounded-full w-fit mt-4">
-                  <Map className="h-4 w-4" />
-                  {path.courses.length} Courses
-                </div>
-              </div>
-              
-              <div className="p-6 md:w-2/3">
-                <div className="relative">
-                  {/* Connecting Line */}
-                  <div className="absolute left-6 top-8 bottom-8 w-0.5 bg-gray-200"></div>
-                  
-                  <div className="space-y-6">
-                    {path.courses.map((pc, idx) => (
-                      <div key={pc.id} className="relative flex gap-4">
-                        <div className="w-12 h-12 rounded-full bg-white border-2 border-primary flex items-center justify-center text-primary font-bold z-10 shadow-sm shrink-0">
-                          {idx + 1}
-                        </div>
-                        <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 flex-1 hover:border-primary transition-colors group">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h3 className="font-bold text-gray-900 group-hover:text-primary transition-colors">{pc.course.title}</h3>
-                              <p className="text-sm text-gray-500 mt-1 line-clamp-1">{pc.course.description}</p>
-                              <div className="flex gap-4 mt-3 text-xs font-medium text-gray-400">
-                                <span>{pc.course._count?.modules || 0} Modules</span>
-                                {pc.course.timeLimitMins && <span>• {pc.course.timeLimitMins} mins</span>}
-                              </div>
-                            </div>
-                            <Link to={`/course/${pc.course.id}`}>
-                              <Button variant="ghost" size="sm" className="hidden sm:flex group-hover:bg-primary group-hover:text-white transition-all">
-                                Go to Course <ChevronRight className="h-4 w-4 ml-1" />
-                              </Button>
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+    </div>`;
 }
+
+function renderPath(path) {
+  return `
+    <div class="path-card">
+      <div class="path-left">
+        <h2 class="path-title">${path.title}</h2>
+        <p class="path-desc">${path.description}</p>
+        ${renderProgressBar(path)}
+        <div class="courses-badge">🗺️ ${path.courses.length} Courses</div>
+      </div>
+      <div class="path-right">
+        <div class="timeline">
+          <div class="timeline-line"></div>
+          ${path.courses.map(renderStep).join("")}
+        </div>
+      </div>
+    </div>`;
+}
+
+document.getElementById("paths").innerHTML = mockPaths.map(renderPath).join("");
+</script>
+</body>
+</html>
+
