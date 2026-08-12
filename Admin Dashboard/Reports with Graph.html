@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports | LMS Admin</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#f4f6f8;
+    --card:#ffffff;
+    --border:#e3e7eb;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --green:#16a34a;
+    --green-dark:#0f7a37;
+    --green-light:#86e6ab;
+    --green-pale:#eafcf1;
+    --amber-bg:#fdf6e3;
+    --amber-border:#f2dea3;
+    --amber-text:#92660a;
+    --radius:12px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+  .wrap{max-width:1320px;margin:0 auto;padding:28px 32px 60px;}
+
+  .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:16px;}
+  .top h1{font-size:28px;margin:0 0 4px;font-weight:700;}
+  .top p{margin:0;color:var(--muted);font-size:14px;}
+  .export-btn{
+    background:#0d1117;color:#fff;border:none;padding:11px 18px;border-radius:8px;
+    font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;
+  }
+  .export-btn:hover{background:#1c2530;}
+
+  .grid-cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:22px;}
+  @media (max-width:900px){.grid-cards{grid-template-columns:1fr;}}
+
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:20px 22px 10px;
+  }
+  .card h2{font-size:16px;margin:0 0 14px;display:flex;align-items:center;gap:8px;font-weight:700;}
+  .card h2 .ic{color:var(--green-dark);}
+  .chart-box{height:260px;position:relative;}
+
+  .alert-banner{
+    background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:var(--radius);
+    padding:16px 22px;margin-bottom:20px;
+  }
+  .alert-banner h3{margin:0 0 4px;color:var(--amber-text);font-size:16px;display:flex;gap:8px;align-items:center;}
+  .alert-banner p{margin:0;color:#8a6a1f;font-size:13.5px;}
+
+  .table-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+
+  .filters-row{
+    display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--border);
+    flex-wrap:wrap;
+  }
+  .filters-label{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:13.5px;font-weight:600;white-space:nowrap;}
+  .filters-row input[type="text"]{
+    flex:1 1 200px;min-width:160px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;
+    font-size:13.5px;outline:none;background:#fbfbfc;
+  }
+  .filters-row input[type="text"]:focus{border-color:var(--green);background:#fff;}
+  .filters-row select{
+    padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13.5px;
+    background:#fbfbfc;min-width:150px;color:var(--text);
+  }
+  .filters-row select:focus{border-color:var(--green);outline:none;}
+  .record-count{margin-left:auto;color:var(--muted);font-size:13px;white-space:nowrap;}
+
+  table{width:100%;border-collapse:collapse;}
+  thead th{
+    text-align:left;font-size:11.5px;letter-spacing:.04em;color:var(--muted);
+    text-transform:uppercase;padding:12px 20px;border-bottom:1px solid var(--border);font-weight:700;
+  }
+  tbody td{padding:16px 20px;border-bottom:1px solid var(--border);font-size:14px;vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:#fafcfa;}
+  .emp-name{font-weight:600;color:var(--text);}
+  .emp-erp{color:var(--muted);font-size:12.5px;margin-top:2px;}
+  .region-tag{
+    display:inline-block;margin-top:4px;font-size:11px;background:var(--green-pale);color:var(--green-dark);
+    padding:2px 8px;border-radius:20px;font-weight:600;
+  }
+  .remind-btn{
+    background:#fff;border:1px solid var(--border);padding:8px 14px;border-radius:8px;
+    font-size:13px;font-weight:600;cursor:pointer;color:var(--text);
+  }
+  .remind-btn:hover{background:var(--green);border-color:var(--green);color:#fff;}
+  .no-results{padding:40px 20px;text-align:center;color:var(--muted);font-size:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div>
+      <h1>Reports</h1>
+      <p>Generate and view system reports.</p>
+    </div>
+    <button class="export-btn">&#8595; Export All Reports</button>
+  </div>
+
+  <div class="grid-cards">
+    <div class="card">
+      <h2><span class="ic">&#128196;</span> Course Completion Rates</h2>
+      <div class="chart-box"><canvas id="courseChart"></canvas></div>
+    </div>
+    <div class="card">
+      <h2><span class="ic">&#128196;</span> Regional Performance</h2>
+      <div class="chart-box"><canvas id="regionChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="alert-banner">
+    <h3>&#9888; Missing Assessments Report</h3>
+    <p>Employees who have completed the course modules but have not yet taken the final assessment.</p>
+  </div>
+
+  <div class="table-card">
+    <div class="filters-row">
+      <span class="filters-label">&#9776; Filters</span>
+      <input type="text" id="searchName" placeholder="Search by name">
+      <input type="text" id="searchErp" placeholder="Search by ERP Number">
+      <select id="courseFilter">
+        <option value="">All Courses</option>
+      </select>
+      <select id="regionFilter">
+        <option value="">All Regions</option>
+      </select>
+      <span class="record-count" id="recordCount">6 of 6 records</span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Employee</th>
+          <th>Course</th>
+          <th>Completed On</th>
+          <th style="text-align:right;">Action</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div class="no-results" id="noResults" style="display:none;">No employees match the selected filters.</div>
+  </div>
+
+</div>
+
+<script>
+const regions = ["RHO Islamabad","RHO Sargodha","RHO Lahore","RHO Multan","RHO Sukkur","RHO Karachi","RHO Quetta","RHO Peshawar","RHO Gawader","RHO AJK","RHO Gilgit Baltistan"];
+
+const employees = [
+  {name:"Ayesha Khan", erp:"NDR-04521", course:"Project Management Essentials", region:"RHO Islamabad"},
+  {name:"Sana Malik", erp:"NDR-02290", course:"Frontline Service Excellence", region:"RHO Lahore"},
+  {name:"Usman Tariq", erp:"NDR-01765", course:"Advanced UX Principles", region:"RHO Karachi"},
+  {name:"Bilal Ahmed", erp:"NDR-03187", course:"Data Protection & Privacy", region:"RHO Sargodha"},
+  {name:"Hina Raza", erp:"NDR-05012", course:"Data Analysis with Python", region:"RHO Multan"},
+  {name:"Kamran Sheikh", erp:"NDR-06210", course:"Project Management Essentials", region:"RHO Peshawar"}
+];
+
+const regionFilter = document.getElementById('regionFilter');
+regions.forEach(r=>{
+  const opt = document.createElement('option');
+  opt.value = r; opt.textContent = r;
+  regionFilter.appendChild(opt);
+});
+
+const courseFilter = document.getElementById('courseFilter');
+[...new Set(employees.map(e=>e.course))].forEach(c=>{
+  const opt = document.createElement('option');
+  opt.value = c; opt.textContent = c;
+  courseFilter.appendChild(opt);
+});
+
+const tableBody = document.getElementById('tableBody');
+const recordCount = document.getElementById('recordCount');
+const noResults = document.getElementById('noResults');
+
+function renderTable(){
+  const nameQ = document.getElementById('searchName').value.trim().toLowerCase();
+  const erpQ = document.getElementById('searchErp').value.trim().toLowerCase();
+  const courseQ = courseFilter.value;
+  const regionQ = regionFilter.value;
+
+  const filtered = employees.filter(e=>{
+    return (!nameQ || e.name.toLowerCase().includes(nameQ)) &&
+           (!erpQ || e.erp.toLowerCase().includes(erpQ)) &&
+           (!courseQ || e.course === courseQ) &&
+           (!regionQ || e.region === regionQ);
+  });
+
+  tableBody.innerHTML = '';
+  filtered.forEach(e=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <div class="emp-name">${e.name}</div>
+        <div class="emp-erp">ERP: ${e.erp}</div>
+        <span class="region-tag">${e.region}</span>
+      </td>
+      <td>${e.course}</td>
+      <td>-</td>
+      <td style="text-align:right;"><button class="remind-btn">Remind User</button></td>
+    `;
+    tableBody.appendChild(tr);
+  });
+
+  recordCount.textContent = `${filtered.length} of ${employees.length} records`;
+  noResults.style.display = filtered.length ? 'none' : 'block';
+}
+
+['searchName','searchErp'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', renderTable);
+});
+[courseFilter, regionFilter].forEach(el=>el.addEventListener('change', renderTable));
+
+renderTable();
+
+const greenShades = ['#0f7a37','#16a34a','#22c55e','#4ade80','#86efac'];
+
+new Chart(document.getElementById('courseChart'), {
+  type:'bar',
+  data:{
+    labels:['PM Essentials','Data Analysis (Py)','Frontline Service','UX Principles','Data Protection'],
+    datasets:[{
+      data:[72,58,91,66,47],
+      backgroundColor: greenShades,
+      borderRadius:6,
+      maxBarThickness:46
+    }]
+  },
+  options:{
+    plugins:{legend:{display:false}, tooltip:{callbacks:{label:(ctx)=>ctx.parsed.y+'%'}}},
+    scales:{
+      y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'},grid:{color:'#eef1f4'}},
+      x:{grid:{display:false}}
+    }
+  }
+});
+
+new Chart(document.getElementById('regionChart'), {
+  type:'bar',
+  data:{
+    labels: regions,
+    datasets:[{
+      data:[81,74,88,69,63,90,58,72,66,55,60],
+      backgroundColor: '#16a34a',
+      borderRadius:6,
+      maxBarThickness:36
+    }]
+  },
+  options:{
+    plugins:{legend:{display:false}, tooltip:{callbacks:{label:(ctx)=>ctx.parsed.y+'%'}}},
+    scales:{
+      y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'},grid:{color:'#eef1f4'}},
+      x:{ticks:{autoSkip:false,maxRotation:45,minRotation:45,font:{size:10}},grid:{display:false}}
+    }
+  }
+});
+</script>
+</body>
+</html>
