@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assessments | LMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Nastaliq+Urdu:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sidebar:#2c5c4f; --sidebar-hover:#3a7060; --sidebar-active-text:#2c5c4f;
+    --accent-1:#3a7060; --accent-2:#6fae95; --bg:#f3f1ec; --card:#ffffff;
+    --text-dark:#1f342e; --text-muted:#6b7a75; --border:#e6e3db;
+    --danger:#c0564a; --warn:#c99a3d; --ok:#3a7060;
+    --radius-lg:18px; --radius-md:12px; --shadow:0 4px 18px rgba(31,52,46,0.06);
+    --font-heading:'Poppins',sans-serif; --font-body:'Inter',sans-serif; --font-ur:'Noto Nastaliq Urdu',serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--font-body);background:var(--bg);color:var(--text-dark);display:flex;min-height:100vh;}
+  html[dir="rtl"] body{font-family:var(--font-ur);}
+  html[dir="rtl"] h1,html[dir="rtl"] h2,html[dir="rtl"] h3,html[dir="rtl"] .brand-name{font-family:var(--font-ur);}
+  a{text-decoration:none;color:inherit;} button{font-family:inherit;cursor:pointer;border:none;}
+  .app{display:flex;width:100%;min-height:100vh;}
+  .sidebar{width:260px;background:var(--sidebar);color:#eaf3ef;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;transition:transform .25s ease;z-index:40;}
+  .brand{display:flex;align-items:center;gap:10px;padding:22px 22px 20px;font-family:var(--font-heading);font-weight:700;font-size:1.25rem;}
+  .cap-icon{flex-shrink:0;}
+  .nav{list-style:none;padding:6px 14px;display:flex;flex-direction:column;gap:4px;}
+  .nav a{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;font-size:.95rem;color:#dcece5;font-weight:500;transition:background .15s,color .15s;}
+  .nav a svg{width:18px;height:18px;flex-shrink:0;}
+  .nav a:hover{background:var(--sidebar-hover);}
+  .nav a.active{background:#fff;color:var(--sidebar-active-text);font-weight:600;}
+  .main{flex:1;display:flex;flex-direction:column;min-width:0;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 32px;background:var(--bg);position:sticky;top:0;z-index:30;gap:16px;flex-wrap:wrap;}
+  .topbar-left{display:flex;align-items:center;gap:14px;}
+  .hamburger{width:40px;height:40px;border-radius:10px;background:#e3e9e5;display:flex;align-items:center;justify-content:center;color:var(--sidebar);}
+  .hamburger svg{width:18px;height:18px;}
+  .page-title{font-family:var(--font-heading);font-weight:700;font-size:1.4rem;}
+  .topbar-right{display:flex;align-items:center;gap:14px;}
+  .lang-toggle{display:flex;background:#e3e9e5;border-radius:20px;padding:4px;gap:2px;}
+  .lang-toggle button{padding:6px 16px;border-radius:16px;font-size:.8rem;font-weight:700;background:transparent;color:var(--text-dark);}
+  .lang-toggle button.active{background:var(--sidebar);color:#fff;}
+  .bell{position:relative;width:40px;height:40px;border-radius:50%;background:#e3e9e5;display:flex;align-items:center;justify-content:center;color:var(--text-dark);}
+  .bell svg{width:18px;height:18px;}
+  .bell .dot{position:absolute;top:-2px;right:-2px;background:var(--danger);color:#fff;font-size:.62rem;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+  .user-tag{display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:700;color:var(--text-dark);white-space:nowrap;}
+  .user-tag svg{width:20px;height:20px;color:var(--accent-1);flex-shrink:0;}
+
+  .content{padding:4px 32px 40px;}
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:22px;}
+  .stat-card{background:var(--card);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:20px;display:flex;flex-direction:column;gap:6px;}
+  .stat-icon{width:40px;height:40px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;color:var(--accent-1);margin-bottom:6px;}
+  .stat-icon svg{width:20px;height:20px;}
+  .stat-num{font-family:var(--font-heading);font-size:1.6rem;font-weight:700;}
+  .stat-label{font-size:.8rem;color:var(--text-muted);font-weight:500;}
+
+  .toolbar{background:var(--card);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:18px 22px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:20px;}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;}
+  .tabs button{padding:9px 16px;border-radius:10px;background:var(--bg);font-size:.83rem;font-weight:600;color:var(--text-muted);}
+  .tabs button.active{background:var(--sidebar);color:#fff;}
+  .search-box{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:10px;padding:10px 14px;flex:1;min-width:200px;max-width:320px;}
+  .search-box svg{width:16px;height:16px;color:var(--text-muted);flex-shrink:0;}
+  .search-box input{border:none;background:transparent;outline:none;width:100%;font-size:.88rem;color:var(--text-dark);font-family:inherit;}
+
+  .list{display:flex;flex-direction:column;gap:14px;}
+  .assess-card{background:var(--card);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:18px 22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;border-left:4px solid var(--cat-color,var(--accent-1));}
+  html[dir="rtl"] .assess-card{border-left:none;border-right:4px solid var(--cat-color,var(--accent-1));}
+  .assess-icon{width:48px;height:48px;border-radius:12px;background:color-mix(in srgb, var(--cat-color,var(--accent-1)) 15%, white);display:flex;align-items:center;justify-content:center;color:var(--cat-color,var(--accent-1));flex-shrink:0;}
+  .assess-icon svg{width:22px;height:22px;}
+  .assess-main{flex:1;min-width:200px;}
+  .assess-title{font-family:var(--font-heading);font-weight:600;font-size:1rem;margin-bottom:4px;}
+  .assess-meta{display:flex;gap:14px;font-size:.78rem;color:var(--text-muted);flex-wrap:wrap;}
+  .assess-meta span{display:flex;align-items:center;gap:5px;}
+  .assess-meta svg{width:13px;height:13px;}
+  .assess-status{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+  .status-pill{font-size:.7rem;font-weight:700;padding:5px 12px;border-radius:20px;}
+  .status-passed{background:#e4f1eb;color:var(--ok);}
+  .status-failed{background:#fbe9e7;color:var(--danger);}
+  .status-progress{background:#fdf1de;color:var(--warn);}
+  .status-new{background:#f1eef8;color:#7a5fb0;}
+  .score{font-size:.85rem;font-weight:700;}
+  .btn{padding:9px 18px;border-radius:10px;font-size:.82rem;font-weight:700;}
+  .btn-primary{background:var(--sidebar);color:#fff;}
+  .btn-primary:hover{background:var(--accent-1);}
+  .btn-outline{background:transparent;border:1.5px solid var(--sidebar);color:var(--sidebar);}
+
+  .overlay{display:none;}
+  @media (max-width:960px){
+    .sidebar{position:fixed;left:0;transform:translateX(-100%);}
+    html[dir="rtl"] .sidebar{left:auto;right:0;transform:translateX(100%);}
+    .sidebar.open{transform:translateX(0);}
+    .overlay.show{display:block;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:35;}
+    .topbar{padding:16px 18px;} .content{padding:4px 18px 32px;}
+    .stats-row{grid-template-columns:repeat(2,1fr);}
+    .page-title{font-size:1.15rem;}
+  }
+  @media (max-width:560px){
+    .stats-row{grid-template-columns:1fr 1fr;}
+    .assess-card{flex-direction:column;align-items:stretch;}
+    .assess-status{align-items:stretch;}
+  }
+  :focus-visible{outline:2px solid var(--accent-1);outline-offset:2px;}
+</style>
+</head>
+<body>
+<div class="overlay" id="overlay"></div>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><svg class="cap-icon" viewBox="0 0 32 32" width="28" height="28" xmlns="http://www.w3.org/2000/svg">
+      <path d="M16 4L2 11l14 7 11.2-5.6V19h2v-8L16 4z" fill="#f4c430"/>
+      <path d="M7 15.5v5c0 1.8 4 4 9 4s9-2.2 9-4v-5L16 20 7 15.5z" fill="#f4c430"/>
+      <circle cx="27.2" cy="12.4" r="1.6" fill="#c99a2e"/>
+    </svg><span class="brand-name" data-i18n="brand">LMS</span></div>
+    <ul class="nav">
+      <li><a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg><span data-i18n="nav_dashboard_t">Dashboard</span></a></li>
+      <li><a href="my-courses.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span data-i18n="nav_courses">My Courses</span></a></li>
+      <li><a href="course-learning.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M10 8l6 4-6 4V8z"/></svg><span data-i18n="nav_learning">Learning</span></a></li>
+      <li><a href="assessments.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4M5 4h14v16l-7-4-7 4V4z"/></svg><span data-i18n="nav_assessments">Assessments</span></a></li>
+      <li><a href="certificates.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M8 13l-2 8 6-3 6 3-2-8"/></svg><span data-i18n="nav_certificates">Certificates</span></a></li>
+      <li><a href="badges.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 6.6L21 9l-5 4.4L17.4 21 12 17.2 6.6 21 8 13.4 3 9l6.6-.4L12 2z"/></svg><span data-i18n="nav_badges">Badges</span></a></li>
+      <li><a href="profile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/></svg><span data-i18n="nav_profile">Profile</span></a></li>
+    </ul>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" id="menuBtn" aria-label="Toggle menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+        <h1 class="page-title" data-i18n="page_title">Assessments</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="lang-toggle"><button id="btnEn" class="active">EN</button><button id="btnUr">اردو</button></div>
+        <div class="bell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg><span class="dot">3</span></div>
+        <div class="user-tag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/></svg>
+          <span data-i18n="user_name">Sara Ahmed</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4M5 4h14v16l-7-4-7 4V4z"/></svg></div>
+          <div class="stat-num">06</div>
+          <div class="stat-label" data-i18n="stat_total">Total Assessments</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></div>
+          <div class="stat-num">03</div>
+          <div class="stat-label" data-i18n="stat_passed">Passed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+          <div class="stat-num">01</div>
+          <div class="stat-label" data-i18n="stat_pending">Pending</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg></div>
+          <div class="stat-num">82%</div>
+          <div class="stat-label" data-i18n="stat_avg">Average Score</div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="tabs" id="tabs">
+          <button class="active" data-filter="all" data-i18n="tab_all">All</button>
+          <button data-filter="passed" data-i18n="tab_passed">Passed</button>
+          <button data-filter="progress" data-i18n="tab_progress">In Progress</button>
+          <button data-filter="failed" data-i18n="tab_failed">Failed</button>
+          <button data-filter="new" data-i18n="tab_new">Not Started</button>
+        </div>
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="text" id="searchInput" data-i18n-ph="search_ph" placeholder="Search assessments...">
+        </div>
+      </div>
+
+      <div class="list" id="assessList"></div>
+    </main>
+  </div>
+</div>
+
+<script>
+const quizIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4M5 4h14v16l-7-4-7 4V4z"/></svg>`;
+const clockIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>`;
+const qIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 015 .5c0 1.5-2.5 1.5-2.5 3.5M12 17h.01"/></svg>`;
+
+const assessments = [
+  { id:1, color:'#c0564a', status:'passed', score:92, duration:'20 min', questions:15, attempts:'1 / 3',
+    title:{en:'Cyber Security Basics — Final Quiz', ur:'سائبر سیکیورٹی کی بنیادی باتیں — حتمی کوئز'} },
+  { id:2, color:'#3a7060', status:'progress', score:null, duration:'15 min', questions:10, attempts:'0 / 2',
+    title:{en:'HTML & CSS Knowledge Check', ur:'ایچ ٹی ایم ایل اور سی ایس ایس علم کی جانچ'} },
+  { id:3, color:'#3a7060', status:'passed', score:88, duration:'25 min', questions:18, attempts:'1 / 3',
+    title:{en:'JavaScript Essentials Test', ur:'جاوا اسکرپٹ کے بنیادی اصول ٹیسٹ'} },
+  { id:4, color:'#7a5fb0', status:'passed', score:95, duration:'10 min', questions:8, attempts:'1 / 2',
+    title:{en:'Communication Skills Quiz', ur:'مواصلات کی مہارتوں کا کوئز'} },
+  { id:5, color:'#c99a3d', status:'failed', score:52, duration:'15 min', questions:12, attempts:'2 / 3',
+    title:{en:'Data Privacy Compliance Exam', ur:'ڈیٹا پرائیویسی کی تعمیل کا امتحان'} },
+  { id:6, color:'#7a5fb0', status:'new', score:null, duration:'20 min', questions:14, attempts:'0 / 2',
+    title:{en:'Leadership Essentials Quiz', ur:'قیادت کے بنیادی اصول کا کوئز'} },
+];
+
+const i18n = {
+  en:{
+    brand:'LMS', nav_dashboard_t:'Dashboard', nav_courses:'My Courses', nav_learning:'Learning',
+    nav_assessments:'Assessments', nav_certificates:'Certificates', nav_badges:'Badges', nav_profile:'Profile',
+    page_title:'Assessments', user_name:'Employee Name', stat_total:'Total Assessments', stat_passed:'Passed', stat_pending:'Pending', stat_avg:'Average Score',
+    tab_all:'All', tab_passed:'Passed', tab_progress:'In Progress', tab_failed:'Failed', tab_new:'Not Started',
+    search_ph:'Search assessments...', duration:'Duration', questions:'Questions', attempts:'Attempts',
+    status_passed:'Passed', status_failed:'Failed', status_progress:'In Progress', status_new:'Not Started',
+    btn_review:'Review', btn_retake:'Retake', btn_resume:'Resume', btn_start:'Start Test', score_label:'Score', empty:'No assessments match your filters.'
+  },
+  ur:{
+    brand:'ایل ایم ایس', nav_dashboard_t:'ڈیش بورڈ', nav_courses:'میرے کورسز', nav_learning:'تعلیم',
+    nav_assessments:'تشخیص', nav_certificates:'اسناد', nav_badges:'بیجز', nav_profile:'پروفائل',
+    page_title:'تشخیص', user_name:'ملازم کا نام', stat_total:'کل تشخیصات', stat_passed:'کامیاب', stat_pending:'زیر التوا', stat_avg:'اوسط اسکور',
+    tab_all:'تمام', tab_passed:'کامیاب', tab_progress:'جاری', tab_failed:'ناکام', tab_new:'شروع نہیں ہوا',
+    search_ph:'تشخیص تلاش کریں...', duration:'دورانیہ', questions:'سوالات', attempts:'کوششیں',
+    status_passed:'کامیاب', status_failed:'ناکام', status_progress:'جاری', status_new:'شروع نہیں ہوا',
+    btn_review:'جائزہ لیں', btn_retake:'دوبارہ دیں', btn_resume:'جاری رکھیں', btn_start:'ٹیسٹ شروع کریں', score_label:'اسکور', empty:'آپ کی فلٹرز سے کوئی تشخیص مماثل نہیں۔'
+  }
+};
+
+let currentLang='en', activeTab='all', searchTerm='';
+
+function t(k){ return i18n[currentLang][k] || k; }
+
+function applyLanguage(lang){
+  currentLang = lang;
+  localStorage.setItem('lms_lang', lang);
+  document.documentElement.lang = lang==='ur'?'ur':'en';
+  document.documentElement.dir = lang==='ur'?'rtl':'ltr';
+  document.getElementById('btnEn').classList.toggle('active', lang==='en');
+  document.getElementById('btnUr').classList.toggle('active', lang==='ur');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if(i18n[lang][key]) el.textContent = i18n[lang][key];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    const key = el.getAttribute('data-i18n-ph');
+    if(i18n[lang][key]) el.setAttribute('placeholder', i18n[lang][key]);
+  });
+  render();
+}
+document.getElementById('btnEn').addEventListener('click', ()=>applyLanguage('en'));
+document.getElementById('btnUr').addEventListener('click', ()=>applyLanguage('ur'));
+
+const sidebar=document.getElementById('sidebar'), overlay=document.getElementById('overlay');
+document.getElementById('menuBtn').addEventListener('click', ()=>{sidebar.classList.toggle('open');overlay.classList.toggle('show');});
+overlay.addEventListener('click', ()=>{sidebar.classList.remove('open');overlay.classList.remove('show');});
+
+document.getElementById('tabs').addEventListener('click', e=>{
+  const btn=e.target.closest('button'); if(!btn) return;
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  activeTab=btn.dataset.filter;
+  render();
+});
+document.getElementById('searchInput').addEventListener('input', e=>{
+  searchTerm=e.target.value.trim().toLowerCase();
+  render();
+});
+
+function statusMeta(s){
+  if(s==='passed') return {pill:'status-passed', label:t('status_passed')};
+  if(s==='failed') return {pill:'status-failed', label:t('status_failed')};
+  if(s==='progress') return {pill:'status-progress', label:t('status_progress')};
+  return {pill:'status-new', label:t('status_new')};
+}
+function buttonLabel(s){
+  if(s==='passed') return t('btn_review');
+  if(s==='failed') return t('btn_retake');
+  if(s==='progress') return t('btn_resume');
+  return t('btn_start');
+}
+
+function render(){
+  const list = document.getElementById('assessList');
+  let items = assessments.filter(a=>{
+    if(activeTab!=='all' && a.status!==activeTab) return false;
+    if(searchTerm && !a.title.en.toLowerCase().includes(searchTerm) && !a.title.ur.includes(searchTerm)) return false;
+    return true;
+  });
+  if(items.length===0){
+    list.innerHTML = `<p style="text-align:center;color:var(--text-muted);padding:40px 0;">${t('empty')}</p>`;
+    return;
+  }
+  list.innerHTML = items.map(a=>{
+    const sm = statusMeta(a.status);
+    return `
+    <div class="assess-card" style="--cat-color:${a.color}">
+      <div class="assess-icon">${quizIcon}</div>
+      <div class="assess-main">
+        <div class="assess-title">${a.title[currentLang]}</div>
+        <div class="assess-meta">
+          <span>${clockIcon} ${a.duration}</span>
+          <span>${qIcon} ${a.questions} ${t('questions')}</span>
+          <span>${t('attempts')}: ${a.attempts}</span>
+        </div>
+      </div>
+      <div class="assess-status">
+        <span class="status-pill ${sm.pill}">${sm.label}</span>
+        ${a.score!==null ? `<span class="score">${t('score_label')}: ${a.score}%</span>` : ''}
+        <button class="btn ${a.status==='new'||a.status==='progress' ? 'btn-primary':'btn-outline'}">${buttonLabel(a.status)}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+applyLanguage(localStorage.getItem('lms_lang') || 'en');
+</script>
+</body>
+</html>

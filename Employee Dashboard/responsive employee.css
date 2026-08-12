@@ -1,0 +1,194 @@
+/*====================================================
+  Responsive Design
+====================================================*/
+
+/* Large Laptop */
+@media (max-width: 1200px){
+
+    .cards{
+        grid-template-columns: repeat(2,1fr);
+    }
+
+    .course-grid{
+        grid-template-columns: repeat(2,1fr);
+    }
+
+}
+
+/* Tablet */
+@media (max-width: 992px){
+
+    .sidebar{
+        width: 90px;
+    }
+
+    .sidebar .logo h2,
+    .sidebar ul li span{
+        display: none;
+    }
+
+    .sidebar ul li a{
+        justify-content: center;
+    }
+
+    .main{
+        margin-left: 90px;
+    }
+
+    body.urdu .main{
+        margin-right: 90px;
+        margin-left: 0;
+    }
+
+    .welcome{
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .course-grid{
+        grid-template-columns: 1fr;
+    }
+
+}
+
+/* Mobile */
+@media (max-width: 768px){
+
+    .sidebar{
+        position: fixed;
+        left: -260px;
+        width: 260px;
+        z-index: 1000;
+    }
+
+    .sidebar.active{
+        left: 0;
+    }
+
+    body.urdu .sidebar{
+        right: -260px;
+        left: auto;
+    }
+
+    body.urdu .sidebar.active{
+        right: 0;
+    }
+
+    .sidebar .logo h2,
+    .sidebar ul li span{
+        display: inline;
+    }
+
+    .sidebar ul li a{
+        justify-content: flex-start;
+    }
+
+    .main{
+        margin-left: 0;
+    }
+
+    body.urdu .main{
+        margin-right: 0;
+        margin-left: 0;
+    }
+
+    header{
+        padding: 0 20px;
+        flex-wrap: wrap;
+        height: auto;
+        gap: 15px;
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+
+    .right{
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .welcome{
+        margin: 20px;
+        padding: 25px;
+    }
+
+    .welcome h1{
+        font-size: 28px;
+    }
+
+    .cards{
+        grid-template-columns: 1fr;
+        padding: 0 20px;
+    }
+
+    .course-grid{
+        grid-template-columns: 1fr;
+        padding: 0 20px;
+    }
+
+    .section-title{
+        margin: 25px 20px 15px;
+    }
+
+    .activity{
+        margin: 20px;
+    }
+
+}
+
+/* Small Mobile */
+@media (max-width: 480px){
+
+    .welcome{
+        padding: 20px;
+    }
+
+    .welcome h1{
+        font-size: 24px;
+    }
+
+    .welcome button{
+        width: 100%;
+    }
+
+    .card{
+        padding: 22px;
+    }
+
+    .course{
+        padding: 20px;
+    }
+
+    .profile h4{
+        font-size: 14px;
+    }
+
+    .profile p{
+        font-size: 12px;
+    }
+
+    .language button{
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+}
+
+/* Extra Small Devices */
+@media (max-width: 360px){
+
+    .welcome h1{
+        font-size: 22px;
+    }
+
+    .left h2{
+        font-size: 18px;
+    }
+
+    .card h2{
+        font-size: 26px;
+    }
+
+}

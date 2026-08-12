@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course Learning | LMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Nastaliq+Urdu:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sidebar:#2c5c4f; --sidebar-hover:#3a7060; --sidebar-active-text:#2c5c4f;
+    --accent-1:#3a7060; --accent-2:#6fae95; --bg:#f3f1ec; --card:#ffffff;
+    --text-dark:#1f342e; --text-muted:#6b7a75; --border:#e6e3db;
+    --danger:#c0564a; --warn:#c99a3d; --ok:#3a7060;
+    --radius-lg:18px; --radius-md:12px; --shadow:0 4px 18px rgba(31,52,46,0.06);
+    --font-heading:'Poppins',sans-serif; --font-body:'Inter',sans-serif; --font-ur:'Noto Nastaliq Urdu',serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--font-body); background:var(--bg); color:var(--text-dark); display:flex; min-height:100vh;}
+  html[dir="rtl"] body{font-family:var(--font-ur);}
+  html[dir="rtl"] h1,html[dir="rtl"] h2,html[dir="rtl"] h3,html[dir="rtl"] .brand-name{font-family:var(--font-ur);}
+  a{text-decoration:none;color:inherit;} button{font-family:inherit;cursor:pointer;border:none;}
+  .app{display:flex;width:100%;min-height:100vh;}
+  .sidebar{width:260px;background:var(--sidebar);color:#eaf3ef;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;transition:transform .25s ease;z-index:40;}
+  .brand{display:flex;align-items:center;gap:10px;padding:22px 22px 20px;font-family:var(--font-heading);font-weight:700;font-size:1.25rem;}
+  .cap-icon{flex-shrink:0;}
+  .nav{list-style:none;padding:6px 14px;display:flex;flex-direction:column;gap:4px;}
+  .nav a{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;font-size:.95rem;color:#dcece5;font-weight:500;transition:background .15s,color .15s;}
+  .nav a svg{width:18px;height:18px;flex-shrink:0;}
+  .nav a:hover{background:var(--sidebar-hover);}
+  .nav a.active{background:#fff;color:var(--sidebar-active-text);font-weight:600;}
+  .main{flex:1;display:flex;flex-direction:column;min-width:0;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 32px;background:var(--bg);position:sticky;top:0;z-index:30;gap:16px;flex-wrap:wrap;}
+  .topbar-left{display:flex;align-items:center;gap:14px;min-width:0;}
+  .hamburger,.back-btn{width:40px;height:40px;border-radius:10px;background:#e3e9e5;display:flex;align-items:center;justify-content:center;color:var(--sidebar);flex-shrink:0;}
+  .hamburger svg,.back-btn svg{width:18px;height:18px;}
+  .title-block{min-width:0;}
+  .page-title{font-family:var(--font-heading);font-weight:700;font-size:1.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .crumb{font-size:.78rem;color:var(--text-muted);font-weight:500;}
+  .topbar-right{display:flex;align-items:center;gap:14px;}
+  .lang-toggle{display:flex;background:#e3e9e5;border-radius:20px;padding:4px;gap:2px;}
+  .lang-toggle button{padding:6px 16px;border-radius:16px;font-size:.8rem;font-weight:700;background:transparent;color:var(--text-dark);}
+  .lang-toggle button.active{background:var(--sidebar);color:#fff;}
+  .bell{position:relative;width:40px;height:40px;border-radius:50%;background:#e3e9e5;display:flex;align-items:center;justify-content:center;color:var(--text-dark);}
+  .bell svg{width:18px;height:18px;}
+  .bell .dot{position:absolute;top:-2px;right:-2px;background:var(--danger);color:#fff;font-size:.62rem;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+  .avatar{width:36px;height:36px;border-radius:50%;background:var(--accent-2);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:.8rem;}
+  .content{padding:4px 32px 40px;flex:1;display:flex;flex-direction:column;min-height:0;}
+  .shell{display:grid;grid-template-columns:1fr 340px;gap:22px;flex:1;min-height:0;}
+  .player-col{display:flex;flex-direction:column;gap:16px;min-width:0;}
+  .video-card{background:#12241f;border-radius:var(--radius-lg);box-shadow:var(--shadow);position:relative;overflow:hidden;aspect-ratio:16/9;}
+  .video-card video{width:100%;height:100%;display:block;object-fit:cover;}
+  .video-fallback{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#cfe3da;gap:12px;}
+  .play-circle{width:64px;height:64px;border-radius:50%;background:var(--accent-2);color:#12241f;display:flex;align-items:center;justify-content:center;font-size:1.4rem;cursor:pointer;}
+  .video-title-badge{position:absolute;top:16px;left:16px;background:rgba(255,255,255,.12);color:#fff;font-size:.72rem;font-weight:700;padding:5px 12px;border-radius:20px;backdrop-filter:blur(4px);z-index:2;}
+  html[dir="rtl"] .video-title-badge{left:auto;right:16px;}
+  .video-card iframe{width:100%;height:100%;display:block;border:none;}
+
+  .video-source-row{display:flex;gap:10px;background:var(--card);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:14px 16px;flex-wrap:wrap;}
+  .video-source-row input{flex:1;min-width:200px;padding:10px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-size:.85rem;color:var(--text-dark);outline:none;font-family:inherit;}
+  .video-source-row input:focus{border-color:var(--accent-1);}
+
+  .upload-row{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:14px;border-top:1px solid var(--border);}
+  .upload-label{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;background:var(--bg);color:var(--sidebar);font-size:.8rem;font-weight:700;cursor:pointer;border:1.5px dashed var(--accent-1);}
+  .upload-label:hover{background:color-mix(in srgb, var(--accent-1) 8%, white);}
+  .upload-label svg{width:16px;height:16px;}
+  .upload-hint{font-size:.72rem;color:var(--text-muted);}
+  .resource-item .r-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .dl-btn{text-decoration:none;display:inline-block;}
+
+  .tabs-card{background:var(--card);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow:hidden;}
+  .tabs-head{display:flex;border-bottom:1px solid var(--border);}
+  .tabs-head button{flex:1;padding:14px 10px;font-size:.85rem;font-weight:600;color:var(--text-muted);border-bottom:3px solid transparent;}
+  .tabs-head button.active{color:var(--sidebar);border-color:var(--sidebar);}
+  .tabs-body{padding:20px 22px;font-size:.88rem;color:var(--text-muted);line-height:1.7;}
+  .tabs-body h4{font-family:var(--font-heading);font-size:.95rem;color:var(--text-dark);margin-bottom:8px;}
+  .resource-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+  .resource-item:last-child{border-bottom:none;}
+  .resource-item svg{width:18px;height:18px;color:var(--accent-1);flex-shrink:0;}
+  .resource-item .r-name{font-weight:600;color:var(--text-dark);font-size:.85rem;flex:1;}
+  .resource-item .r-size{font-size:.72rem;color:var(--text-muted);}
+  .dl-btn{padding:6px 12px;border-radius:8px;background:var(--bg);font-size:.72rem;font-weight:700;color:var(--sidebar);}
+
+  .nav-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--card);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:14px 18px;flex-wrap:wrap;}
+  .btn{padding:10px 18px;border-radius:10px;font-size:.83rem;font-weight:700;display:inline-flex;align-items:center;gap:6px;}
+  .btn svg{width:16px;height:16px;}
+  .btn-primary{background:var(--sidebar);color:#fff;}
+  .btn-primary:hover{background:var(--accent-1);}
+  .btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text-dark);}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  .overall-progress{display:flex;align-items:center;gap:10px;font-size:.8rem;font-weight:600;color:var(--text-muted);min-width:160px;}
+  .mini-track{flex:1;height:8px;border-radius:6px;background:var(--bg);overflow:hidden;}
+  .mini-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--accent-1),var(--accent-2));}
+
+  .lesson-col{background:var(--card);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:20px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;}
+  .lesson-col h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;}
+  .lesson-summary{font-size:.78rem;color:var(--text-muted);}
+  .chapter{margin-bottom:6px;}
+  .chapter-head{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-muted);padding:10px 4px 6px;}
+  .lesson-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;cursor:pointer;border:1.5px solid transparent;}
+  .lesson-item:hover{background:var(--bg);}
+  .lesson-item.current{background:color-mix(in srgb, var(--accent-1) 10%, white);border-color:var(--accent-1);}
+  .lesson-icon{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.7rem;}
+  .lesson-icon.done{background:var(--ok);color:#fff;}
+  .lesson-icon.current{background:var(--accent-2);color:#fff;}
+  .lesson-icon.todo{background:var(--border);color:var(--text-muted);}
+  .lesson-icon svg{width:13px;height:13px;}
+  .lesson-text .l-title{font-size:.83rem;font-weight:600;color:var(--text-dark);}
+  .lesson-text .l-sub{font-size:.7rem;color:var(--text-muted);}
+
+  .overlay{display:none;}
+  @media (max-width:1080px){.shell{grid-template-columns:1fr;} .lesson-col{order:-1;max-height:260px;}}
+  @media (max-width:960px){
+    .sidebar{position:fixed;left:0;transform:translateX(-100%);}
+    html[dir="rtl"] .sidebar{left:auto;right:0;transform:translateX(100%);}
+    .sidebar.open{transform:translateX(0);}
+    .overlay.show{display:block;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:35;}
+    .topbar{padding:16px 18px;} .content{padding:4px 18px 32px;} .page-title{font-size:1.05rem;}
+  }
+  @media (max-width:560px){.nav-controls{flex-direction:column;align-items:stretch;} .tabs-head button{font-size:.75rem;padding:12px 6px;}}
+  :focus-visible{outline:2px solid var(--accent-1);outline-offset:2px;}
+</style>
+</head>
+<body>
+<div class="overlay" id="overlay"></div>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><svg class="cap-icon" viewBox="0 0 32 32" width="28" height="28" xmlns="http://www.w3.org/2000/svg">
+      <path d="M16 4L2 11l14 7 11.2-5.6V19h2v-8L16 4z" fill="#f4c430"/>
+      <path d="M7 15.5v5c0 1.8 4 4 9 4s9-2.2 9-4v-5L16 20 7 15.5z" fill="#f4c430"/>
+      <circle cx="27.2" cy="12.4" r="1.6" fill="#c99a2e"/>
+    </svg><span class="brand-name" data-i18n="brand">LMS</span></div>
+    <ul class="nav">
+      <li><a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg><span data-i18n="nav_dashboard_t">Dashboard</span></a></li>
+      <li><a href="my-courses.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span data-i18n="nav_courses">My Courses</span></a></li>
+      <li><a href="course-learning.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M10 8l6 4-6 4V8z"/></svg><span data-i18n="nav_learning">Learning</span></a></li>
+      <li><a href="assessments.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4M5 4h14v16l-7-4-7 4V4z"/></svg><span data-i18n="nav_assessments">Assessments</span></a></li>
+      <li><a href="certificates.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M8 13l-2 8 6-3 6 3-2-8"/></svg><span data-i18n="nav_certificates">Certificates</span></a></li>
+      <li><a href="badges.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 6.6L21 9l-5 4.4L17.4 21 12 17.2 6.6 21 8 13.4 3 9l6.6-.4L12 2z"/></svg><span data-i18n="nav_badges">Badges</span></a></li>
+      <li><a href="profile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/></svg><span data-i18n="nav_profile">Profile</span></a></li>
+    </ul>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" id="menuBtn" aria-label="Toggle menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+        <a class="back-btn" href="my-courses.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></a>
+        <div class="title-block">
+          <div class="crumb" data-i18n="crumb">My Courses / JavaScript Essentials</div>
+          <h1 class="page-title" data-i18n="page_title">Course Learning</h1>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="lang-toggle"><button id="btnEn" class="active">EN</button><button id="btnUr">اردو</button></div>
+        <div class="bell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg><span class="dot">3</span></div>
+        <div class="avatar">SA</div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="shell">
+        <div class="player-col">
+          <div class="video-card" id="videoCard">
+            <span class="video-title-badge" data-i18n="video_badge">Video Lesson</span>
+            <div class="video-fallback" id="videoFallback">
+              <div class="play-circle" id="playBtn">▶</div>
+              <p data-i18n="video_hint" style="font-size:.85rem;color:#a9c6ba;">Click to play the lesson video</p>
+            </div>
+          </div>
+
+          <div class="video-source-row">
+            <input type="text" id="ytInput" data-i18n-ph="yt_ph" placeholder="Paste a YouTube video link...">
+            <button class="btn btn-primary" id="loadYtBtn"><span data-i18n="load_video">Load Video</span></button>
+          </div>
+
+          <div class="tabs-card">
+            <div class="tabs-head" id="tabHead">
+              <button class="active" data-tab="about" data-i18n="tab_about">About</button>
+              <button data-tab="resources" data-i18n="tab_resources">Resources</button>
+              <button data-tab="notes" data-i18n="tab_notes">My Notes</button>
+              <button data-tab="discussion" data-i18n="tab_discussion">Discussion</button>
+            </div>
+            <div class="tabs-body" id="tabBody"></div>
+          </div>
+
+          <div class="nav-controls">
+            <button class="btn btn-outline" id="prevBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg><span data-i18n="btn_prev">Previous</span></button>
+            <div class="overall-progress">
+              <span data-i18n="overall">Progress</span>
+              <div class="mini-track"><div class="mini-fill" id="overallFill" style="width:55%"></div></div>
+              <span id="overallPct">55%</span>
+            </div>
+            <button class="btn btn-primary" id="nextBtn"><span data-i18n="btn_next">Next Lesson</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button>
+          </div>
+        </div>
+
+        <div class="lesson-col">
+          <div>
+            <h3 data-i18n="lessons_title">Lessons</h3>
+            <p class="lesson-summary"><span id="doneCount">5</span> / <span id="totalCount">9</span> <span data-i18n="lessons_completed">completed</span></p>
+          </div>
+          <div id="lessonList"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+const chapters = [
+  { name:{en:'Getting Started', ur:'شروعات'}, lessons:[
+      { title:{en:'Course Introduction', ur:'کورس کا تعارف'}, dur:'3:20', status:'done' },
+      { title:{en:'Setting Up Your Editor', ur:'ایڈیٹر کی تنصیب'}, dur:'5:10', status:'done' },
+  ]},
+  { name:{en:'JavaScript Basics', ur:'جاوا اسکرپٹ کی بنیادیں'}, lessons:[
+      { title:{en:'Variables & Data Types', ur:'ویری ایبلز اور ڈیٹا ٹائپس'}, dur:'8:45', status:'done' },
+      { title:{en:'Functions & Scope', ur:'فنکشنز اور اسکوپ'}, dur:'10:12', status:'done' },
+      { title:{en:'Arrays & Objects', ur:'اریز اور آبجیکٹس'}, dur:'9:30', status:'done' },
+  ]},
+  { name:{en:'DOM & Events', ur:'ڈی او ایم اور ایونٹس'}, lessons:[
+      { title:{en:'Selecting DOM Elements', ur:'ڈی او ایم عناصر کا انتخاب'}, dur:'7:05', status:'current' },
+      { title:{en:'Handling Events', ur:'ایونٹس کو ہینڈل کرنا'}, dur:'11:20', status:'todo' },
+      { title:{en:'Forms & Validation', ur:'فارمز اور تصدیق'}, dur:'9:50', status:'todo' },
+  ]},
+  { name:{en:'Wrap Up', ur:'اختتام'}, lessons:[
+      { title:{en:'Final Project Walkthrough', ur:'حتمی پروجیکٹ کا جائزہ'}, dur:'14:00', status:'todo' },
+  ]},
+];
+
+const flat = chapters.flatMap(c => c.lessons);
+let currentIndex = flat.findIndex(l => l.status === 'current');
+let currentLang = 'en';
+let activeTab = 'about';
+
+const iconDone = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>`;
+const playIconSmall = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+
+const resources = [
+  { name:{en:'Lesson Slides.pdf', ur:'لیسن سلائیڈز.pdf'}, size:'1.2 MB' },
+  { name:{en:'Code Starter Files.zip', ur:'کوڈ اسٹارٹر فائلز.zip'}, size:'340 KB' },
+  { name:{en:'Cheat Sheet.pdf', ur:'چیٹ شیٹ.pdf'}, size:'220 KB' },
+];
+
+const i18n = {
+  en:{
+    brand:'LMS', nav_dashboard_t:'Dashboard', nav_courses:'My Courses', nav_learning:'Learning',
+    nav_assessments:'Assessments', nav_certificates:'Certificates', nav_badges:'Badges', nav_profile:'Profile',
+    crumb:'My Courses / JavaScript Essentials', page_title:'Course Learning',
+    video_badge:'Video Lesson', video_hint:'Click to play the lesson video',
+    tab_about:'About', tab_resources:'Resources', tab_notes:'My Notes', tab_discussion:'Discussion',
+    about_body:'This lesson explains how to select and manipulate DOM elements using JavaScript, covering querySelector, querySelectorAll, and common traversal methods you will use throughout the course.',
+    notes_body:'Your personal notes for this lesson will appear here. Add a note anytime while watching to keep track of key points.',
+    discussion_body:'12 learners are discussing this lesson. Ask a question or share your thoughts with the class.',
+    download:'Download',
+    btn_prev:'Previous', btn_next:'Next Lesson', overall:'Progress',
+    lessons_title:'Lessons', lessons_completed:'completed',
+    yt_ph:'Paste a YouTube video link...', load_video:'Load Video',
+    upload_label:'Upload Word or PDF file', upload_hint:'Accepted formats: .pdf, .doc, .docx'
+  },
+  ur:{
+    brand:'ایل ایم ایس', nav_dashboard_t:'ڈیش بورڈ', nav_courses:'میرے کورسز', nav_learning:'تعلیم',
+    nav_assessments:'تشخیص', nav_certificates:'اسناد', nav_badges:'بیجز', nav_profile:'پروفائل',
+    crumb:'میرے کورسز / جاوا اسکرپٹ کے بنیادی اصول', page_title:'کورس لرننگ',
+    video_badge:'ویڈیو لیسن', video_hint:'لیسن ویڈیو چلانے کے لیے کلک کریں',
+    tab_about:'تفصیل', tab_resources:'وسائل', tab_notes:'میرے نوٹس', tab_discussion:'گفتگو',
+    about_body:'یہ سبق بتاتا ہے کہ جاوا اسکرپٹ کا استعمال کرتے ہوئے ڈی او ایم عناصر کو کیسے منتخب اور تبدیل کیا جائے، جس میں querySelector اور دیگر عام طریقے شامل ہیں۔',
+    notes_body:'اس سبق کے لیے آپ کے ذاتی نوٹس یہاں ظاہر ہوں گے۔ دیکھتے ہوئے کسی بھی وقت نوٹ شامل کریں۔',
+    discussion_body:'12 طلبہ اس سبق پر گفتگو کر رہے ہیں۔ سوال پوچھیں یا اپنی رائے شیئر کریں۔',
+    download:'ڈاؤن لوڈ',
+    btn_prev:'پچھلا', btn_next:'اگلا سبق', overall:'پیش رفت',
+    lessons_title:'اسباق', lessons_completed:'مکمل شدہ',
+    yt_ph:'یوٹیوب ویڈیو کا لنک یہاں پیسٹ کریں...', load_video:'ویڈیو لوڈ کریں',
+    upload_label:'Word یا PDF فائل اپ لوڈ کریں', upload_hint:'قابل قبول فارمیٹس: .pdf, .doc, .docx'
+  }
+};
+
+function applyLanguage(lang){
+  currentLang = lang;
+  localStorage.setItem('lms_lang', lang);
+  document.documentElement.lang = lang === 'ur' ? 'ur' : 'en';
+  document.documentElement.dir = lang === 'ur' ? 'rtl' : 'ltr';
+  document.getElementById('btnEn').classList.toggle('active', lang==='en');
+  document.getElementById('btnUr').classList.toggle('active', lang==='ur');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if(i18n[lang][key]) el.textContent = i18n[lang][key];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    const key = el.getAttribute('data-i18n-ph');
+    if(i18n[lang][key]) el.setAttribute('placeholder', i18n[lang][key]);
+  });
+  renderLessons();
+  renderTabBody();
+}
+
+document.getElementById('btnEn').addEventListener('click', ()=>applyLanguage('en'));
+document.getElementById('btnUr').addEventListener('click', ()=>applyLanguage('ur'));
+
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+document.getElementById('menuBtn').addEventListener('click', ()=>{sidebar.classList.toggle('open');overlay.classList.toggle('show');});
+overlay.addEventListener('click', ()=>{sidebar.classList.remove('open');overlay.classList.remove('show');});
+
+document.getElementById('playBtn').addEventListener('click', ()=>{
+  const fb = document.getElementById('videoFallback');
+  if(fb) fb.innerHTML = `<p style="color:#cfe3da;font-size:.85rem;">▶ Playing (demo placeholder — connect your own video source, or paste a YouTube link below)</p>`;
+});
+
+function extractYouTubeId(url){
+  if(!url) return null;
+  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+  return m ? m[1] : null;
+}
+
+function loadYouTubeVideo(){
+  const url = document.getElementById('ytInput').value.trim();
+  const id = extractYouTubeId(url);
+  const card = document.getElementById('videoCard');
+  if(!id){
+    alert(currentLang === 'ur' ? 'براہ کرم ایک درست یوٹیوب لنک درج کریں۔' : 'Please enter a valid YouTube link.');
+    return;
+  }
+  card.innerHTML = `
+    <span class="video-title-badge" data-i18n="video_badge">${t('video_badge')}</span>
+    <iframe src="https://www.youtube.com/embed/${id}" title="YouTube video player"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen></iframe>
+  `;
+}
+document.getElementById('loadYtBtn').addEventListener('click', loadYouTubeVideo);
+document.getElementById('ytInput').addEventListener('keydown', e => { if(e.key === 'Enter') loadYouTubeVideo(); });
+
+const allowedExt = ['pdf','doc','docx'];
+function humanFileSize(bytes){
+  if(bytes < 1024) return bytes + ' B';
+  if(bytes < 1024*1024) return (bytes/1024).toFixed(0) + ' KB';
+  return (bytes/(1024*1024)).toFixed(1) + ' MB';
+}
+function handleFileUpload(fileList){
+  const files = Array.from(fileList);
+  let rejected = [];
+  files.forEach(file => {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if(!allowedExt.includes(ext)){
+      rejected.push(file.name);
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    resources.push({
+      name:{ en:file.name, ur:file.name },
+      size: humanFileSize(file.size),
+      url,
+      uploaded:true
+    });
+  });
+  if(rejected.length){
+    alert((currentLang==='ur' ? 'صرف Word یا PDF فائلیں قابل قبول ہیں: ' : 'Only Word or PDF files are allowed: ') + rejected.join(', '));
+  }
+  if(activeTab === 'resources') renderTabBody();
+}
+
+document.getElementById('tabHead').addEventListener('click', e=>{
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  document.querySelectorAll('#tabHead button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  activeTab = btn.dataset.tab;
+  renderTabBody();
+});
+
+function renderTabBody(){
+  const body = document.getElementById('tabBody');
+  if(activeTab === 'about'){
+    body.innerHTML = `<h4 data-i18n="tab_about">${t('tab_about')}</h4><p>${t('about_body')}</p>`;
+  } else if(activeTab === 'resources'){
+    const list = resources.map(r => `
+      <div class="resource-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+        <span class="r-name">${r.name[currentLang]}</span>
+        <span class="r-size">${r.size}</span>
+        ${r.url
+          ? `<a class="dl-btn" href="${r.url}" download="${r.name.en}">${t('download')}</a>`
+          : `<button class="dl-btn">${t('download')}</button>`}
+      </div>`).join('');
+    body.innerHTML = `
+      ${list}
+      <div class="upload-row">
+        <label class="upload-label" for="fileUpload">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>
+          <span data-i18n="upload_label">${t('upload_label')}</span>
+        </label>
+        <input type="file" id="fileUpload" accept=".pdf,.doc,.docx" multiple style="display:none">
+      </div>
+      <p class="upload-hint">${t('upload_hint')}</p>
+    `;
+    document.getElementById('fileUpload').addEventListener('change', e => handleFileUpload(e.target.files));
+  } else if(activeTab === 'notes'){
+    body.innerHTML = `<p>${t('notes_body')}</p>`;
+  } else {
+    body.innerHTML = `<p>${t('discussion_body')}</p>`;
+  }
+}
+function t(key){ return i18n[currentLang][key] || key; }
+
+function renderLessons(){
+  const list = document.getElementById('lessonList');
+  document.getElementById('totalCount').textContent = flat.length;
+  document.getElementById('doneCount').textContent = flat.filter(l=>l.status==='done').length;
+  let html = '';
+  let flatIdx = 0;
+  chapters.forEach(ch => {
+    html += `<div class="chapter-head">${ch.name[currentLang]}</div>`;
+    ch.lessons.forEach(() => {
+      const idx = flatIdx;
+      const l = flat[idx];
+      const isCurrent = idx === currentIndex;
+      const iconClass = isCurrent ? 'current' : l.status;
+      const iconHtml = l.status === 'done' ? iconDone : (isCurrent ? playIconSmall : (idx+1));
+      html += `
+        <div class="lesson-item ${isCurrent?'current':''}" data-index="${idx}">
+          <div class="lesson-icon ${iconClass}">${iconHtml}</div>
+          <div class="lesson-text">
+            <div class="l-title">${l.title[currentLang]}</div>
+            <div class="l-sub">${l.dur}</div>
+          </div>
+        </div>`;
+      flatIdx++;
+    });
+  });
+  list.innerHTML = html;
+  list.querySelectorAll('.lesson-item').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      currentIndex = parseInt(el.dataset.index);
+      renderLessons();
+      updateProgress();
+    });
+  });
+}
+
+function updateProgress(){
+  const doneCount = flat.filter(l=>l.status==='done').length;
+  const pct = Math.round((doneCount/flat.length)*100);
+  document.getElementById('overallFill').style.width = pct+'%';
+  document.getElementById('overallPct').textContent = pct+'%';
+  document.getElementById('prevBtn').disabled = currentIndex === 0;
+  document.getElementById('nextBtn').disabled = currentIndex === flat.length-1;
+}
+
+document.getElementById('prevBtn').addEventListener('click', ()=>{
+  if(currentIndex>0){ currentIndex--; renderLessons(); updateProgress(); }
+});
+document.getElementById('nextBtn').addEventListener('click', ()=>{
+  if(currentIndex < flat.length-1){
+    flat[currentIndex].status = 'done';
+    currentIndex++;
+    renderLessons(); updateProgress();
+  }
+});
+
+applyLanguage(localStorage.getItem('lms_lang') || 'en');
+updateProgress();
+</script>
+</body>
+</html>
